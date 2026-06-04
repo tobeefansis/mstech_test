@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_glass_morphism/flutter_glass_morphism.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../../core/widgets/glass_scaffold.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -20,24 +23,33 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    return GlassScaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: GlassMorphismAppBar(
+          backgroundColor: const Color(0xFF4A2B70),
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Настройки')),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        children: [
-          // ── About the App ──────────────────────────────────────────────────
-          Text(
-            'О приложении',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.primary,
-            ),
+          title: const Text(
+            'Настройки',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 12),
-          _InfoCard(
-            children: [
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        children: [
+          // ── About ────────────────────────────────────────────────────────
+          _SectionHeader(label: 'О приложении'),
+          const SizedBox(height: 10),
+          _GlassCard(
+            children: const [
               _InfoRow(
                 icon: Icons.apps_rounded,
                 label: 'Название',
@@ -48,27 +60,17 @@ class SettingsScreen extends StatelessWidget {
                 label: 'Версия',
                 value: '1.0.0',
               ),
-              _InfoRow(
-                icon: Icons.build_rounded,
-                label: 'Сборка',
-                value: '1',
-              ),
+              _InfoRow(icon: Icons.build_rounded, label: 'Сборка', value: '1'),
             ],
           ),
 
           const SizedBox(height: 28),
 
-          // ── Developer ──────────────────────────────────────────────────────
-          Text(
-            'Разработчик',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          _InfoCard(
-            children: [
+          // ── Developer ────────────────────────────────────────────────────
+          _SectionHeader(label: 'Разработчик'),
+          const SizedBox(height: 10),
+          _GlassCard(
+            children: const [
               _InfoRow(
                 icon: Icons.person_rounded,
                 label: 'Компания',
@@ -89,55 +91,84 @@ class SettingsScreen extends StatelessWidget {
 
           const SizedBox(height: 28),
 
-          // ── Legal ──────────────────────────────────────────────────────────
-          Text(
-            'Правовая информация',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          FilledButton.tonal(
-            onPressed: () => _openPrivacyPolicy(context),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+          // ── Legal ────────────────────────────────────────────────────────
+          _SectionHeader(label: 'Правовая информация'),
+          const SizedBox(height: 10),
+
+          SizedBox(
+            height: 52,
+            child: GlassMorphismButton(
+              onPressed: () => _openPrivacyPolicy(context),
+              style: GlassMorphismButtonStyle(
+                backgroundColor: const Color(0xFF8B6FF9),
+                borderRadius: BorderRadius.circular(16),
+                blurIntensity: 12,
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.privacy_tip_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'Политика конфиденциальности',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.privacy_tip_rounded),
-                SizedBox(width: 10),
-                Text(
-                  'Политика конфиденциальности',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
-              ],
-            ),
           ),
+
+          const SizedBox(height: 24),
         ],
       ),
     );
   }
 }
 
-// ─── Reusable card ────────────────────────────────────────────────────────────
+// ─── Section header ───────────────────────────────────────────────────────────
 
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.children});
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: Colors.white.withValues(alpha: 0.5),
+        letterSpacing: 0.8,
+      ),
+    );
+  }
+}
+
+// ─── Glass info card ──────────────────────────────────────────────────────────
+
+class _GlassCard extends StatelessWidget {
+  const _GlassCard({required this.children});
 
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14),
-      ),
+    return GlassMorphismMaterial(
+      blurIntensity: 20,
+      opacity: 0.12,
+      glassThickness: 1.5,
+      borderRadius: BorderRadius.circular(20),
+      enableGlassBorder: true,
       child: Column(
         children: [
           for (int i = 0; i < children.length; i++) ...[
@@ -146,9 +177,7 @@ class _InfoCard extends StatelessWidget {
               Divider(
                 height: 1,
                 indent: 52,
-                color: Theme.of(
-                  context,
-                ).colorScheme.outline.withValues(alpha: 0.15),
+                color: Colors.white.withValues(alpha: 0.1),
               ),
           ],
         ],
@@ -156,6 +185,8 @@ class _InfoCard extends StatelessWidget {
     );
   }
 }
+
+// ─── Info row ─────────────────────────────────────────────────────────────────
 
 class _InfoRow extends StatelessWidget {
   const _InfoRow({
@@ -170,20 +201,22 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       child: Row(
         children: [
-          Icon(icon, size: 22, color: theme.colorScheme.primary),
+          Icon(icon, size: 20, color: const Color(0xFF9C8FFF)),
           const SizedBox(width: 14),
-          Text(label, style: theme.textTheme.bodyMedium),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white, fontSize: 15),
+          ),
           const Spacer(),
           Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white.withValues(alpha: 0.55),
             ),
           ),
         ],

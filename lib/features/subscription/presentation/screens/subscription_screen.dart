@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_glass_morphism/flutter_glass_morphism.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/widgets/glass_scaffold.dart';
 import '../../domain/entities/subscription_status.dart';
 import '../providers/subscription_provider.dart';
 
@@ -10,9 +12,8 @@ class SubscriptionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(subscriptionProvider);
-    final theme = Theme.of(context);
 
-    return Scaffold(
+    return GlassScaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -20,22 +21,27 @@ class SubscriptionScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              Text(
+
+              // ── Header ─────────────────────────────────────────────────
+              const Text(
                 'Choose Your Plan',
-                style: theme.textTheme.headlineMedium?.copyWith(
+                style: TextStyle(
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Unlock all features with a subscription.',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white.withValues(alpha: 0.65),
                 ),
               ),
               const SizedBox(height: 48),
 
-              // Monthly card
+              // ── Monthly card ────────────────────────────────────────────
               _SubscriptionCard(
                 title: 'Monthly',
                 price: '\$9.99 / month',
@@ -43,19 +49,21 @@ class SubscriptionScreen extends ConsumerWidget {
                 status: SubscriptionStatus.monthly,
                 isLoading: state.isLoading,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 28),
 
-              // Yearly card (with badge)
+              // ── Yearly card (with badge) ────────────────────────────────
               _SubscriptionCard(
                 title: 'Yearly',
                 price: '\$59.99 / year',
-                description: 'That\'s just \$5/month — best value!',
+                description: "That's just \$5/month — best value!",
                 badge: 'Save 50%',
                 status: SubscriptionStatus.yearly,
                 isLoading: state.isLoading,
               ),
 
               const Spacer(),
+
+              // ── Restore purchases ───────────────────────────────────────
               Center(
                 child: TextButton(
                   onPressed: state.isLoading
@@ -63,7 +71,12 @@ class SubscriptionScreen extends ConsumerWidget {
                       : () {
                           // TODO: Implement restore purchases
                         },
-                  child: const Text('Restore Purchases'),
+                  child: Text(
+                    'Restore Purchases',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.55),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -96,37 +109,27 @@ class _SubscriptionCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // Card body
-        InkWell(
+        // ── Glass card body ───────────────────────────────────────────────
+        GestureDetector(
           onTap: isLoading
               ? null
               : () async {
                   await ref
                       .read(subscriptionProvider.notifier)
                       .subscribe(status);
-                  // RouterNotifier will automatically redirect to /home
+                  // RouterNotifier automatically redirects to /home
                 },
-          borderRadius: BorderRadius.circular(16),
-          child: Ink(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                colors: [
-                  theme.colorScheme.primaryContainer,
-                  theme.colorScheme.surface,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: Border.all(color: theme.colorScheme.primary, width: 2),
-            ),
+          child: GlassMorphismMaterial(
+            blurIntensity: 20,
+            opacity: 0.12,
+            glassThickness: 1.5,
+            borderRadius: BorderRadius.circular(20),
+            enableGlassBorder: true,
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(22),
               child: Row(
                 children: [
                   Expanded(
@@ -135,41 +138,46 @@ class _SubscriptionCard extends ConsumerWidget {
                       children: [
                         Text(
                           title,
-                          style: theme.textTheme.titleLarge?.copyWith(
+                          style: const TextStyle(
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 5),
                         Text(
                           price,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: theme.colorScheme.primary,
+                          style: const TextStyle(
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
+                            color: Color(0xFF9C8FFF),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 5),
                         Text(
                           description,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white.withValues(alpha: 0.55),
                           ),
                         ),
                       ],
                     ),
                   ),
                   if (isLoading)
-                    SizedBox(
+                    const SizedBox(
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: theme.colorScheme.primary,
+                        color: Color(0xFF9C8FFF),
                       ),
                     )
                   else
-                    Icon(
+                    const Icon(
                       Icons.arrow_forward_ios_rounded,
-                      color: theme.colorScheme.primary,
+                      color: Color(0xFF9C8FFF),
+                      size: 18,
                     ),
                 ],
               ),
@@ -177,16 +185,25 @@ class _SubscriptionCard extends ConsumerWidget {
           ),
         ),
 
-        // Discount badge
+        // ── Discount badge ────────────────────────────────────────────────
         if (badge != null)
           Positioned(
             top: -14,
             right: 16,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.orange,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF6B35), Color(0xFFFF1744)],
+                ),
                 borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF1744).withValues(alpha: 0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Text(
                 badge!,

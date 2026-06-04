@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_glass_morphism/flutter_glass_morphism.dart';
 
 class EmojiCell extends StatelessWidget {
   const EmojiCell({super.key, required this.emoji});
@@ -7,19 +8,13 @@ class EmojiCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Center(child: Text(emoji, style: const TextStyle(fontSize: 34))),
+    return GlassMorphismMaterial(
+      blurIntensity: 16,
+      opacity: 0.1,
+      glassThickness: 1.0,
+      borderRadius: BorderRadius.circular(16),
+      enableGlassBorder: true,
+      child: Center(child: Text(emoji, style: const TextStyle(fontSize: 30))),
     );
   }
 }
